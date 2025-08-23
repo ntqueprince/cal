@@ -93,23 +93,33 @@ function selectMode(mode) {
         '<div class="w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center"><i class="fas fa-check text-white text-xs"></i></div>';
 }
         
-// Calculate time difference between two Panchang dates
-function calculateTimeDifference(fromYear, fromMonth, fromDay, toYear, toMonth, toDay) {
-    let years = toYear - fromYear;
-    let months = toMonth - fromMonth;
-    let days = toDay - fromDay;
-
-    // Handle negative days
-    if (days < 0) {
-        months--;
-        days += 30; // Assuming an average of 30 days per month
+// Calculate time difference between two Panchang dates with Paksha logic
+function calculateTimeDifference(fromYear, fromMonth, fromDay, fromPaksha, toYear, toMonth, toDay, toPaksha) {
+    let totalDays = 0;
+    
+    // Convert 'from' date to a single day number
+    let fromMonthNumber = (fromMonth - 1) * 30; // Assuming 30 days for each month
+    if (fromPaksha === 'sudi') {
+        fromMonthNumber += 15; // Add 15 days for sudi paksha
     }
+    const fromTotalDays = (fromYear * 360) + fromMonthNumber + fromDay; // 360 days in a year
 
-    // Handle negative months
-    if (months < 0) {
-        years--;
-        months += 12;
+    // Convert 'to' date to a single day number
+    let toMonthNumber = (toMonth - 1) * 30;
+    if (toPaksha === 'sudi') {
+        toMonthNumber += 15;
     }
+    const toTotalDays = (toYear * 360) + toMonthNumber + toDay;
+    
+    totalDays = toTotalDays - fromTotalDays;
+
+    // Convert total days back to years, months, and days
+    let years = Math.floor(totalDays / 360);
+    let remainingDays = totalDays % 360;
+    
+    let months = Math.floor(remainingDays / 30);
+    let days = remainingDays % 30;
+    
     return { years, months, days };
 }
         
@@ -133,7 +143,7 @@ function validateInputs() {
     // Validate time period
     const years = parseInt(document.getElementById('years').value) || 0;
     const months = parseInt(document.getElementById('months').value) || 0;
-    if (years === 0 && months === 0) {
+    if (years === 0 && months === 0 && !selectedDateRange) {
         document.getElementById('timeError').textContent = 'Please enter at least some time period or select a date range';
         document.getElementById('timeError').classList.remove('hidden');
         isValid = false;
@@ -305,13 +315,16 @@ document.addEventListener('DOMContentLoaded', () => {
     setDateBtn.addEventListener('click', () => {
         const fromYear = parseInt(document.getElementById('fromYear').value);
         const fromMonth = parseInt(document.getElementById('fromMonth').value);
+        const fromPaksha = document.getElementById('fromPaksha').value;
         const fromDay = parseInt(document.getElementById('fromDay').value);
+
         const toYear = parseInt(document.getElementById('toYear').value);
         const toMonth = parseInt(document.getElementById('toMonth').value);
+        const toPaksha = document.getElementById('toPaksha').value;
         const toDay = parseInt(document.getElementById('toDay').value);
         
-        if (fromYear && fromMonth && fromDay && toYear && toMonth && toDay) {
-            selectedDateRange = calculateTimeDifference(fromYear, fromMonth, fromDay, toYear, toMonth, toDay);
+        if (fromYear && fromMonth && fromPaksha && fromDay && toYear && toMonth && toPaksha && toDay) {
+            selectedDateRange = calculateTimeDifference(fromYear, fromMonth, fromDay, fromPaksha, toYear, toMonth, toDay, toPaksha);
             
             // Update the button text to show the selected time
             const dateRangeText = document.getElementById('dateRangeText');
