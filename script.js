@@ -21,20 +21,20 @@ function initializeDateRangeDropdowns() {
     const fromDaySelect = document.getElementById('fromDay');
     const toDaySelect = document.getElementById('toDay');
 
-    // Months in Hindi and English
+    // Months in Hindi and English (reordered)
     const months = [
-        { value: 1, text: 'चैत / Chait' },
-        { value: 2, text: 'वैशाख / Vaishakh' },
-        { value: 3, text: 'ज्येष्ठ / Jyeshtha' },
-        { value: 4, text: 'आषाढ़ / Ashadha' },
-        { value: 5, text: 'श्रावण / Shravana' },
-        { value: 6, text: 'भाद्रपद / Bhadrapada' },
-        { value: 7, text: 'आश्विन / Ashvin' },
-        { value: 8, text: 'कार्तिक / Kartik' },
-        { value: 9, text: 'मार्गशीर्ष / Margashirsha' },
-        { value: 10, text: 'पौष / Pausha' },
-        { value: 11, text: 'माघ / Magha' },
-        { value: 12, text: 'फाल्गुन / Phalguna' }
+        { value: 1, text: 'आश्विन / Ashvin' },
+        { value: 2, text: 'कार्तिक / Kartik' },
+        { value: 3, text: 'मार्गशीर्ष / Margashirsha' },
+        { value: 4, text: 'पौष / Pausha' },
+        { value: 5, text: 'माघ / Magha' },
+        { value: 6, text: 'फाल्गुन / Phalguna' },
+        { value: 7, text: 'चैत / Chait' },
+        { value: 8, text: 'वैशाख / Vaishakh' },
+        { value: 9, text: 'ज्येष्ठ / Jyeshtha' },
+        { value: 10, text: 'आषाढ़ / Ashadha' },
+        { value: 11, text: 'श्रावण / Shravana' },
+        { value: 12, text: 'भाद्रपद / Bhadrapada' }
     ];
 
     // Populate Years from 1420 to 1480
