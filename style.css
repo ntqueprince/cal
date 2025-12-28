@@ -27,8 +27,8 @@
 .input-field {
     border: 2px solid #e5e7eb;
     border-radius: 12px;
-    padding: 16px;
-    font-size: 16px;
+    padding: 12px;
+    font-size: 14px;
     transition: all 0.3s ease;
     background: white;
 }
