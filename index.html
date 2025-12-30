@@ -54,7 +54,6 @@
                                 <input type="number" id="days" class="input-field display-field w-full" value="0">
                             </div>
                         </div>
-                        <p class="text-[10px] text-gray-400 mt-2 italic text-center"></p>
                     </div>
                     
                     <!-- Rate Selection -->
@@ -99,7 +98,7 @@
 
                 <!-- Results -->
                 <div id="results" class="hidden animate-in">
-                    <!-- Result getContent will be injected here via script -->
+                    <!-- Result content will be injected here via script -->
                 </div>
 
                 <!-- Date Selection Modal -->
@@ -114,26 +113,35 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-purple-600 uppercase mb-2">From (Udhaar ki Taarikh)</label>
+                                <label class="block text-xs font-bold text-purple-600 uppercase mb-2">From (उधार की तारीख)</label>
                                 <div class="grid grid-cols-2 gap-2">
                                     <select id="fromYear" class="input-field text-sm" required><option value="">Year</option></select>
                                     <select id="fromMonth" class="input-field text-sm" required><option value="">Month</option></select>
                                     <select id="fromPaksha" class="input-field text-sm" required>
                                         <option value="">Paksha</option>
-                                        <option value="sudi">Sudi</option>
-                                        <option value="badi">Badi</option>
+                                        <option value="sudi">सुदी / Sudi</option>
+                                        <option value="badi">बदी / Badi</option>
                                     </select>
                                     <select id="fromDay" class="input-field text-sm" required><option value="">Day</option></select>
                                 </div>
                             </div>
 
-                            <div class="opacity-60 bg-gray-50 p-3 rounded-lg border border-dashed">
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-2 text-center">Auto-Today's Date</label>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-dashed border-gray-300">
+                                <div class="flex justify-between items-center mb-2 px-1">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase">Auto-Today's Date</label>
+                                    <div class="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md border border-gray-200 shadow-sm">
+                                        <span class="text-[9px] text-purple-600 font-bold uppercase tracking-tighter">Edit</span>
+                                        <input type="checkbox" id="enableToDate" class="w-3.5 h-3.5 cursor-pointer accent-purple-600">
+                                    </div>
+                                </div>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <select id="toYear" class="input-field text-sm" disabled></select>
-                                    <select id="toMonth" class="input-field text-sm" disabled></select>
-                                    <select id="toPaksha" class="input-field text-sm" disabled></select>
-                                    <select id="toDay" class="input-field text-sm" disabled></select>
+                                    <select id="toYear" class="input-field text-sm bg-gray-100 cursor-not-allowed" disabled></select>
+                                    <select id="toMonth" class="input-field text-sm bg-gray-100 cursor-not-allowed" disabled></select>
+                                    <select id="toPaksha" class="input-field text-sm bg-gray-100 cursor-not-allowed" disabled>
+                                        <option value="sudi">Sudi</option>
+                                        <option value="badi">Badi</option>
+                                    </select>
+                                    <select id="toDay" class="input-field text-sm bg-gray-100 cursor-not-allowed" disabled></select>
                                 </div>
                             </div>
                         </div>
@@ -149,4 +157,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
