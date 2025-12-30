@@ -182,10 +182,21 @@ function displayResults(result, principal, rate, years, months, days, mode) {
     }
     detailsHtml += `</div>`;
 
-    const summaryHtml = `<div class="breakdown-item border-purple-600 bg-purple-100 mt-4 shadow-sm">
-        <div class="flex justify-between text-purple-900"><span>कुल ब्याज (Total Interest):</span><b class="text-lg">₹${result.interest.toFixed(2)}</b></div>
-        <div class="flex justify-between text-purple-900 mt-1"><span>कुल राशि (Final Amount):</span><b class="text-xl">₹${result.finalAmount.toFixed(2)}</b></div>
-    </div>`;
+    // Updated Summary: Green background for Total Interest with white text
+    const summaryHtml = `
+        <div class="breakdown-item border-green-600 bg-green-600 mt-4 shadow-sm">
+            <div class="flex justify-between text-white">
+                <span>कुल ब्याज (Total Interest):</span>
+                <b class="text-lg text-white">₹${result.interest.toFixed(2)}</b>
+            </div>
+        </div>
+        <div class="breakdown-item border-purple-600 bg-purple-100 mt-2 shadow-sm">
+            <div class="flex justify-between text-purple-900">
+                <span>कुल राशि (Final Amount):</span>
+                <b class="text-xl">₹${result.finalAmount.toFixed(2)}</b>
+            </div>
+        </div>
+    `;
 
     resultsDiv.innerHTML = `<div class="result-box">${headerHtml}${detailsHtml}${summaryHtml}</div>`;
     resultsDiv.scrollIntoView({ behavior: 'smooth' });
