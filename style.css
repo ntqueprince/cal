@@ -31,15 +31,17 @@
     outline: none;
 }
 
-/* Enabled display style */
+/* Updated Display Fields to prevent text clipping */
 .display-field {
     background: #ffffff !important;
     border: 1.5px solid #8b5cf6 !important;
     font-weight: 700 !important;
-    padding-top: 26px !important;
-    padding-bottom: 6px !important;
+    padding-top: 24px !important;
+    padding-bottom: 4px !important;
     color: #4c1d95 !important;
     font-size: 16px !important;
+    height: 54px !important; /* Fixed height for padding space */
+    line-height: 1 !important;
 }
 
 /* Disabled display style */
@@ -109,13 +111,18 @@
     margin-top: 24px;
 }
 
+/* Removed background: white to allow bg-utility classes from JS */
 .breakdown-item {
-    background: white;
     border-radius: 10px;
     padding: 12px;
     margin-bottom: 8px;
     border-left: 4px solid #8b5cf6;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* Default fallback background if no utility class is provided */
+.breakdown-item:not([class*='bg-']) {
+    background-color: white;
 }
 
 .animate-in {
