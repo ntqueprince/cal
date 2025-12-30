@@ -59,18 +59,28 @@ function initializeDateRangeDropdowns() {
     const toDay = document.getElementById('toDay');
     const toPaksha = document.getElementById('toPaksha');
 
-    if (fromYear) for (let i = 1420; i <= 1480; i++) fromYear.add(new Option(i, i));
-    if (fromMonth) MONTHS_FASALI.forEach(m => fromMonth.add(new Option(m.text, m.value)));
-    if (fromDay) for (let i = 1; i <= 15; i++) fromDay.add(new Option(i, i));
+    // Populate "From" and "To" Years
+    for (let i = 1420; i <= 1480; i++) {
+        if (fromYear) fromYear.add(new Option(i, i));
+        if (toYear) toYear.add(new Option(i, i));
+    }
+    
+    // Populate "From" and "To" Months
+    MONTHS_FASALI.forEach(m => {
+        if (fromMonth) fromMonth.add(new Option(m.text, m.value));
+        if (toMonth) toMonth.add(new Option(m.text, m.value));
+    });
+
+    // Populate "From" and "To" Days
+    for (let i = 1; i <= 15; i++) {
+        if (fromDay) fromDay.add(new Option(i, i));
+        if (toDay) toDay.add(new Option(i, i));
+    }
 
     const today = getTodayFasali();
-    if (toYear) { toYear.add(new Option(today.year, today.year)); toYear.value = today.year; }
-    if (toMonth) {
-        const currentMonthObj = MONTHS_FASALI.find(m => m.value === today.month);
-        toMonth.add(new Option(currentMonthObj.text, today.month));
-        toMonth.value = today.month;
-    }
-    if (toDay) { toDay.add(new Option(today.day, today.day)); toDay.value = today.day; }
+    if (toYear) toYear.value = today.year;
+    if (toMonth) toMonth.value = today.month;
+    if (toDay) toDay.value = today.day;
     if (toPaksha) toPaksha.value = today.phase;
 }
 
@@ -182,7 +192,6 @@ function displayResults(result, principal, rate, years, months, days, mode) {
     }
     detailsHtml += `</div>`;
 
-    // Updated Summary: Green background for Total Interest with white text
     const summaryHtml = `
         <div class="breakdown-item border-green-600 bg-green-600 mt-4 shadow-sm">
             <div class="flex justify-between text-white">
@@ -232,6 +241,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dateRangeText) dateRangeText.classList.add('text-lite');
     });
 
+    // To Date Toggle Logic
+    const toggleToDate = document.getElementById('enableToDate');
+    const toFields = ['toYear', 'toMonth', 'toPaksha', 'toDay'];
+    
+    if (toggleToDate) {
+        toggleToDate.addEventListener('change', function() {
+            const isChecked = this.checked;
+            toFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = !isChecked;
+                    if (isChecked) {
+                        el.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    } else {
+                        el.classList.add('bg-gray-100', 'cursor-not-allowed');
+                        // Reset to today when disabling
+                        const today = getTodayFasali();
+                        if (id === 'toYear') el.value = today.year;
+                        if (id === 'toMonth') el.value = today.month;
+                        if (id === 'toPaksha') el.value = today.phase;
+                        if (id === 'toDay') el.value = today.day;
+                    }
+                }
+            });
+        });
+    }
+
     // Shortcuts
     document.querySelectorAll('#rateShortcuts .ui-shortcut').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -257,10 +293,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const fM = parseInt(document.getElementById('fromMonth').value);
         const fP = document.getElementById('fromPaksha').value;
         const fD = parseInt(document.getElementById('fromDay').value);
-        if (!fY || !fM || !fP || !fD) return;
+        
+        const tY = parseInt(document.getElementById('toYear').value);
+        const tM = parseInt(document.getElementById('toMonth').value);
+        const tP = document.getElementById('toPaksha').value;
+        const tD = parseInt(document.getElementById('toDay').value);
 
-        const today = getTodayFasali();
-        const diff = calculateTimeDifference(fY, fM, fD, fP, today.year, today.month, today.day, today.phase);
+        if (!fY || !fM || !fP || !fD || !tY || !tM || !tP || !tD) {
+            alert("उधार की पूरी तारीख चुनें / Select complete From and To dates.");
+            return;
+        }
+
+        const diff = calculateTimeDifference(fY, fM, fD, fP, tY, tM, tD, tP);
 
         // RESET: Enable all fields and fill them
         yearsInput.disabled = false;
