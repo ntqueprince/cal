@@ -1,19 +1,16 @@
-// Global state for date range
-let selectedDateRange = null;
-
-// Fasali Constants from logic file (DO NOT CHANGE)
+// --- Global state & Constants ---
 const MONTHS_FASALI = [
-    { value: 1, text: 'आश्विन / Ashvin' },
-    { value: 2, text: 'कार्तिक / Kartik' },
+    { value: 1, text: 'आश्विन / Ashvin' }, 
+    { value: 2, text: 'कार्तिक / Kartik' }, 
     { value: 3, text: 'मार्गशीर्ष / Agahan' },
-    { value: 4, text: 'पौष / Pausha' },
-    { value: 5, text: 'माघ / Magha' },
+    { value: 4, text: 'पौष / Pausha' }, 
+    { value: 5, text: 'माघ / Magha' }, 
     { value: 6, text: 'फाल्गुन / Phalguna' },
-    { value: 7, text: 'चैत / Chait' },
-    { value: 8, text: 'वैशाख / Vaishakh' },
+    { value: 7, text: 'चैत / Chait' }, 
+    { value: 8, text: 'वैशाख / Vaishakh' }, 
     { value: 9, text: 'ज्येष्ठ / Jyeshtha' },
-    { value: 10, text: 'आषाढ़ / Ashadha' },
-    { value: 11, text: 'श्रावण / Shravana' },
+    { value: 10, text: 'आषाढ़ / Ashadha' }, 
+    { value: 11, text: 'श्रावण / Shravana' }, 
     { value: 12, text: 'भाद्रपद / Bhadrapada' }
 ];
 
@@ -62,47 +59,30 @@ function initializeDateRangeDropdowns() {
     const toDay = document.getElementById('toDay');
     const toPaksha = document.getElementById('toPaksha');
 
-    if (fromYear) {
-        for (let i = 1420; i <= 1480; i++) fromYear.add(new Option(i, i));
-    }
-    if (fromMonth) {
-        MONTHS_FASALI.forEach(m => fromMonth.add(new Option(m.text, m.value)));
-    }
-    if (fromDay) {
-        for (let i = 1; i <= 15; i++) fromDay.add(new Option(i, i));
-    }
+    if (fromYear) for (let i = 1420; i <= 1480; i++) fromYear.add(new Option(i, i));
+    if (fromMonth) MONTHS_FASALI.forEach(m => fromMonth.add(new Option(m.text, m.value)));
+    if (fromDay) for (let i = 1; i <= 15; i++) fromDay.add(new Option(i, i));
 
     const today = getTodayFasali();
-    if (toYear) {
-        toYear.add(new Option(today.year, today.year));
-        toYear.value = today.year;
-    }
+    if (toYear) { toYear.add(new Option(today.year, today.year)); toYear.value = today.year; }
     if (toMonth) {
         const currentMonthObj = MONTHS_FASALI.find(m => m.value === today.month);
         toMonth.add(new Option(currentMonthObj.text, today.month));
         toMonth.value = today.month;
     }
-    if (toDay) {
-        toDay.add(new Option(today.day, today.day));
-        toDay.value = today.day;
-    }
-    if (toPaksha) {
-        toPaksha.value = today.phase;
-    }
+    if (toDay) { toDay.add(new Option(today.day, today.day)); toDay.value = today.day; }
+    if (toPaksha) toPaksha.value = today.phase;
 }
 
 function selectMode(modeValue) {
     const hiddenInputs = document.getElementsByName('calculationMode');
-    hiddenInputs.forEach(input => {
-        if (input.value === modeValue) input.checked = true;
-    });
-
+    hiddenInputs.forEach(input => { if (input.value === modeValue) input.checked = true; });
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === modeValue);
     });
 }
 
-// --- CALCULATIONS (DO NOT CHANGE) ---
+// --- CALCULATIONS ---
 function calculateTimeDifference(fY, fM, fD, fP, tY, tM, tD, tP) {
     const startTotal = fasaliToTotalDays({year: fY, month: fM, phase: fP, day: fD});
     const endTotal = fasaliToTotalDays({year: tY, month: tM, phase: tP, day: tD});
@@ -115,46 +95,46 @@ function calculateTimeDifference(fY, fM, fD, fP, tY, tM, tD, tP) {
     return { years, months, days };
 }
 
-function calculateSimpleInterest(principal, rate, years, months) {
-    const totalMonths = (years * 12) + months;
+function calculateSimpleInterest(principal, rate, years, months, days) {
+    const totalMonths = (years * 12) + months + (days / 30);
     const interest = (principal * rate * totalMonths) / 100;
     return {
         interest: interest,
         finalAmount: principal + interest,
-        breakdown: [`Total Interest for ${years} years ${months} months: ₹${interest.toFixed(2)}`]
+        breakdown: [`${years} साल, ${months} माह, ${days} दिन के लिए कुल ब्याज: ₹${interest.toFixed(2)}`]
     };
 }
 
-function calculateCustomInterest(principal, rate, years, months) {
+function calculateCustomInterest(principal, rate, years, months, days) {
     let currentPrincipal = principal;
     let totalInterest = 0;
     let breakdown = [];
     for (let year = 1; year <= years; year++) {
         const yearlyInterest = (currentPrincipal * rate * 12) / 100;
         totalInterest += yearlyInterest;
-        breakdown.push(`Year ${year}: ₹${yearlyInterest.toFixed(2)} (Base: ₹${currentPrincipal.toFixed(2)})`);
+        breakdown.push(`साल ${year}: ₹${yearlyInterest.toFixed(2)} (मूलधन: ₹${currentPrincipal.toFixed(2)})`);
         currentPrincipal += yearlyInterest;
     }
-    if (months > 0) {
-        const monthlyInterest = (currentPrincipal * rate * months) / 100;
-        totalInterest += monthlyInterest;
-        breakdown.push(`Extra ${months} months: ₹${monthlyInterest.toFixed(2)} (Base: ₹${currentPrincipal.toFixed(2)})`);
+    if (months > 0 || days > 0) {
+        const remainingTimeInMonths = months + (days / 30);
+        const extraInterest = (currentPrincipal * rate * remainingTimeInMonths) / 100;
+        totalInterest += extraInterest;
+        breakdown.push(`अतिरिक्त ${months} माह, ${days} दिन: ₹${extraInterest.toFixed(2)} (मूलधन: ₹${currentPrincipal.toFixed(2)})`);
     }
     return { interest: totalInterest, finalAmount: principal + totalInterest, breakdown: breakdown };
 }
 
-// Global function to toggle result details
+// Result Details Toggle
 window.toggleDetails = function() {
     const wrapper = document.getElementById('detailsWrapper');
     const icon = document.querySelector('#detailsToggleBtn i');
+    if (!wrapper) return;
     if (wrapper.classList.contains('hidden')) {
         wrapper.classList.remove('hidden');
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
+        if (icon) { icon.classList.replace('fa-chevron-down', 'fa-chevron-up'); }
     } else {
         wrapper.classList.add('hidden');
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
+        if (icon) { icon.classList.replace('fa-chevron-up', 'fa-chevron-down'); }
     }
 };
 
@@ -167,152 +147,123 @@ if (calcForm) {
         const rate = parseFloat(document.getElementById('interestRate').value);
         const years = parseInt(document.getElementById('years').value) || 0;
         const months = parseInt(document.getElementById('months').value) || 0;
+        const days = parseInt(document.getElementById('days').value) || 0;
         const modeInput = document.querySelector('input[name="calculationMode"]:checked');
         const mode = modeInput ? modeInput.value : 'custom';
 
         let result = (mode === 'simple') 
-            ? calculateSimpleInterest(principal, rate, years, months)
-            : calculateCustomInterest(principal, rate, years, months);
+            ? calculateSimpleInterest(principal, rate, years, months, days)
+            : calculateCustomInterest(principal, rate, years, months, days);
         
-        displayResults(result, principal, rate, years, months, mode);
+        displayResults(result, principal, rate, years, months, days, mode);
     });
 }
 
-function displayResults(result, principal, rate, years, months, mode) {
-    const container = document.getElementById('resultContent');
+function displayResults(result, principal, rate, years, months, days, mode) {
     const resultsDiv = document.getElementById('results');
-    if (!container || !resultsDiv) return;
-    
+    if (!resultsDiv) return;
     resultsDiv.classList.remove('hidden');
 
-    // Header with Toggle
-    const headerHtml = `
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="text-md font-bold text-gray-800 flex items-center">
-                <i class="fas fa-file-invoice-dollar text-purple-600 mr-2"></i> Result Details
-            </h3>
-            <button type="button" onclick="toggleDetails()" class="text-purple-600 hover:text-purple-800 transition-all p-2 bg-purple-50 rounded-full" id="detailsToggleBtn">
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
-    `;
+    const headerHtml = `<div class="flex justify-between items-center mb-3">
+        <h3 class="text-md font-bold text-gray-800 flex items-center"><i class="fas fa-file-invoice-dollar text-purple-600 mr-2"></i> गणना का विवरण (Details)</h3>
+        <button type="button" onclick="toggleDetails()" class="text-purple-600 p-2 bg-purple-50 rounded-full" id="detailsToggleBtn"><i class="fas fa-chevron-down"></i></button>
+    </div>`;
 
-    // Part to hide (Details and Breakdown)
-    let detailsHtml = `
-        <div id="detailsWrapper" class="hidden animate-in">
-            <div class="breakdown-item">
-                <div class="flex justify-between mb-1 text-gray-500 text-xs font-bold uppercase">Details:</div>
-                <div class="flex justify-between mb-1"><span>Principal:</span><b>₹${principal.toFixed(2)}</b></div>
-                <div class="flex justify-between mb-1"><span>Time:</span><b>${years}Y ${months}M</b></div>
-                <div class="flex justify-between"><span>Rate:</span><b>${rate}% monthly</b></div>
-            </div>
-    `;
-
+    let detailsHtml = `<div id="detailsWrapper" class="hidden animate-in">
+        <div class="breakdown-item">
+            <div class="flex justify-between mb-1 text-gray-500 text-xs font-bold uppercase">विवरण (Summary):</div>
+            <div class="flex justify-between mb-1"><span>मूलधन (Principal):</span><b>₹${principal.toFixed(2)}</b></div>
+            <div class="flex justify-between mb-1"><span>समय (Time):</span><b>${years} साल ${months} माह ${days} दिन</b></div>
+            <div class="flex justify-between"><span>दर (Rate):</span><b>${rate}% प्रति माह</b></div>
+        </div>`;
     if (result.breakdown.length > 1) {
-        detailsHtml += '<div class="text-[10px] text-purple-600 mt-4 mb-2 font-black uppercase tracking-widest">Compounding Breakdown:</div>';
-        result.breakdown.forEach(item => {
-            detailsHtml += `<div class="breakdown-item text-sm py-2">${item}</div>`;
-        });
+        detailsHtml += '<div class="text-[10px] text-purple-600 mt-4 mb-2 font-black uppercase tracking-widest">कंपाउंडिंग ब्रेकडाउन (Breakdown):</div>';
+        result.breakdown.forEach(item => { detailsHtml += `<div class="breakdown-item text-sm py-2">${item}</div>`; });
     }
-    detailsHtml += `</div>`; // Close detailsWrapper
+    detailsHtml += `</div>`;
 
-    // Summary (Always Visible)
-    const summaryHtml = `
-        <div class="breakdown-item border-purple-600 bg-purple-100 mt-4 shadow-sm">
-            <div class="flex justify-between text-purple-900"><span>Total Interest:</span><b class="text-lg">₹${result.interest.toFixed(2)}</b></div>
-            <div class="flex justify-between text-purple-900 mt-1"><span>Final Amount:</span><b class="text-xl">₹${result.finalAmount.toFixed(2)}</b></div>
-        </div>
-    `;
+    const summaryHtml = `<div class="breakdown-item border-purple-600 bg-purple-100 mt-4 shadow-sm">
+        <div class="flex justify-between text-purple-900"><span>कुल ब्याज (Total Interest):</span><b class="text-lg">₹${result.interest.toFixed(2)}</b></div>
+        <div class="flex justify-between text-purple-900 mt-1"><span>कुल राशि (Final Amount):</span><b class="text-xl">₹${result.finalAmount.toFixed(2)}</b></div>
+    </div>`;
 
-    // Inject all parts into the container
-    // We update the whole result-box structure inside the results container
-    resultsDiv.innerHTML = `
-        <div class="result-box">
-            ${headerHtml}
-            ${detailsHtml}
-            ${summaryHtml}
-        </div>
-    `;
-
+    resultsDiv.innerHTML = `<div class="result-box">${headerHtml}${detailsHtml}${summaryHtml}</div>`;
     resultsDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
-// --- EVENT LISTENERS ---
+// --- MAIN EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
     initializeRateDropdown();
     initializeDateRangeDropdowns();
 
-    const modal = document.getElementById('dateRangeModal');
-    const rateSelect = document.getElementById('interestRate');
+    const yearsInput = document.getElementById('years');
+    const monthsInput = document.getElementById('months');
+    const daysInput = document.getElementById('days');
     const dateRangeText = document.getElementById('dateRangeText');
+    const rateSelect = document.getElementById('interestRate');
 
-    // Interest Rate Shortcuts
+    // --- MANUAL INPUT DISABLING LOGIC ---
+    yearsInput.addEventListener('input', () => {
+        monthsInput.value = 0;
+        daysInput.value = 0;
+        monthsInput.disabled = true;
+        daysInput.disabled = true;
+        if (dateRangeText) dateRangeText.classList.add('text-lite');
+    });
+
+    monthsInput.addEventListener('input', () => {
+        daysInput.value = 0;
+        daysInput.disabled = true;
+        if (dateRangeText) dateRangeText.classList.add('text-lite');
+    });
+    
+    daysInput.addEventListener('input', () => {
+        if (dateRangeText) dateRangeText.classList.add('text-lite');
+    });
+
+    // Shortcuts
     document.querySelectorAll('#rateShortcuts .ui-shortcut').forEach(btn => {
         btn.addEventListener('click', () => {
-            const val = btn.dataset.value;
             if (rateSelect) {
-                rateSelect.value = val;
+                rateSelect.value = btn.dataset.value;
                 document.querySelectorAll('#rateShortcuts .ui-shortcut').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
         });
     });
 
-    if (rateSelect) {
-        rateSelect.addEventListener('change', () => {
-            document.querySelectorAll('#rateShortcuts .ui-shortcut').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === rateSelect.value);
-            });
-        });
-    }
-
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => selectMode(btn.dataset.mode));
     });
 
-    // Detect manual edits to Years/Months and make Date Range text "lite"
-    const markAsManual = () => {
-        if (dateRangeText) dateRangeText.classList.add('text-lite');
-    };
-
-    ['years', 'months'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', markAsManual);
-    });
-
     // Modal Events
-    const openBtn = document.getElementById('openDateRangeBtn');
-    const closeBtn = document.getElementById('closeDateRangeBtn');
-    const setBtn = document.getElementById('setDateRangeBtn');
+    const modal = document.getElementById('dateRangeModal');
+    document.getElementById('openDateRangeBtn').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('closeDateRangeBtn').addEventListener('click', () => modal.classList.add('hidden'));
 
-    if (openBtn) openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-    if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    document.getElementById('setDateRangeBtn').addEventListener('click', () => {
+        const fY = parseInt(document.getElementById('fromYear').value);
+        const fM = parseInt(document.getElementById('fromMonth').value);
+        const fP = document.getElementById('fromPaksha').value;
+        const fD = parseInt(document.getElementById('fromDay').value);
+        if (!fY || !fM || !fP || !fD) return;
 
-    if (setBtn) {
-        setBtn.addEventListener('click', () => {
-            const fY = parseInt(document.getElementById('fromYear').value);
-            const fM = parseInt(document.getElementById('fromMonth').value);
-            const fP = document.getElementById('fromPaksha').value;
-            const fD = parseInt(document.getElementById('fromDay').value);
+        const today = getTodayFasali();
+        const diff = calculateTimeDifference(fY, fM, fD, fP, today.year, today.month, today.day, today.phase);
 
-            if (!fY || !fM || !fP || !fD) {
-                alert("उधार की पूरी तारीख चुनें / Select complete From date.");
-                return;
-            }
-
-            const today = getTodayFasali();
-            const diff = calculateTimeDifference(fY, fM, fD, fP, today.year, today.month, today.day, today.phase);
-
-            document.getElementById('years').value = diff.years;
-            document.getElementById('months').value = diff.months;
-            document.getElementById('dateRangeText').textContent = `${diff.years}Y ${diff.months}M ${diff.days}D`;
-            
-            // Reset "lite" state because this is a fresh auto-calculation
-            if (dateRangeText) dateRangeText.classList.remove('text-lite');
-            
-            modal.classList.add('hidden');
-        });
-    }
+        // RESET: Enable all fields and fill them
+        yearsInput.disabled = false;
+        monthsInput.disabled = false;
+        daysInput.disabled = false;
+        
+        yearsInput.value = diff.years;
+        monthsInput.value = diff.months;
+        daysInput.value = diff.days;
+        
+        dateRangeText.textContent = `${diff.years}Y ${diff.months}M ${diff.days}D`;
+        dateRangeText.classList.remove('text-lite');
+        modal.classList.add('hidden');
+    });
 
     selectMode('custom');
 });
