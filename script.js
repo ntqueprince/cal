@@ -38,6 +38,40 @@ function getTodayFasali() {
     return totalDaysToFasali(promptRefTotal + drift);
 }
 
+// --- UI HELPERS ---
+function setPakshaValue(targetId, value) {
+    const hiddenInput = document.getElementById(targetId);
+    if (!hiddenInput) return;
+    
+    hiddenInput.value = value;
+    
+    // Update visual state of buttons in the same container
+    const container = hiddenInput.parentElement;
+    container.querySelectorAll('.paksha-pill-prominent').forEach(btn => {
+        if (btn.dataset.value === value) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+/**
+ * Updates the text label for the "To" date section based on current values.
+ */
+function updateToDateDisplayLabel() {
+    const y = document.getElementById('toYear').value;
+    const mSelect = document.getElementById('toMonth');
+    const mText = mSelect.options[mSelect.selectedIndex]?.text.split(' / ')[0] || '';
+    const pValue = document.getElementById('toPaksha').value;
+    const pText = pValue === 'sudi' ? 'सुदी' : 'बदी';
+    const d = document.getElementById('toDay').value;
+    const label = document.getElementById('toDateDisplayLabel');
+    if (label) {
+        label.textContent = `${mText}-${pText}-${d}-${y}`;
+    }
+}
+
 // --- UI INITIALIZATION ---
 function initializeRateDropdown() {
     const rateSelect = document.getElementById('interestRate');
@@ -57,7 +91,6 @@ function initializeDateRangeDropdowns() {
     const toYear = document.getElementById('toYear');
     const toMonth = document.getElementById('toMonth');
     const toDay = document.getElementById('toDay');
-    const toPaksha = document.getElementById('toPaksha');
 
     // Populate "From" and "To" Years
     for (let i = 1420; i <= 1480; i++) {
@@ -81,7 +114,13 @@ function initializeDateRangeDropdowns() {
     if (toYear) toYear.value = today.year;
     if (toMonth) toMonth.value = today.month;
     if (toDay) toDay.value = today.day;
-    if (toPaksha) toPaksha.value = today.phase;
+    
+    // Set initial Paksha states
+    setPakshaValue('fromPaksha', 'sudi');
+    setPakshaValue('toPaksha', today.phase);
+
+    // Initial label update
+    updateToDateDisplayLabel();
 }
 
 function selectMode(modeValue) {
@@ -222,6 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateRangeText = document.getElementById('dateRangeText');
     const rateSelect = document.getElementById('interestRate');
 
+    // Paksha Pill Click Handling
+    document.querySelectorAll('.paksha-pill-prominent').forEach(pill => {
+        pill.addEventListener('click', function() {
+            setPakshaValue(this.dataset.target, this.dataset.value);
+            // If toggling 'toPaksha', ensure display label updates if visible
+            if (this.dataset.target === 'toPaksha') {
+                updateToDateDisplayLabel();
+            }
+        });
+    });
+
+    // Handle dropdown changes for display label
+    ['toYear', 'toMonth', 'toDay'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateToDateDisplayLabel);
+    });
+
     // --- MANUAL INPUT DISABLING LOGIC ---
     yearsInput.addEventListener('input', () => {
         monthsInput.value = 0;
@@ -241,13 +296,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dateRangeText) dateRangeText.classList.add('text-lite');
     });
 
-    // To Date Toggle Logic
+    // To Date Toggle Logic (Text ↔ Edit)
     const toggleToDate = document.getElementById('enableToDate');
-    const toFields = ['toYear', 'toMonth', 'toPaksha', 'toDay'];
+    const toFields = ['toYear', 'toMonth', 'toDay'];
+    const toPakshaContainer = document.getElementById('toPakshaContainer');
+    const toDateEditControls = document.getElementById('toDateEditControls');
+    const toDateDisplayLabel = document.getElementById('toDateDisplayLabel');
     
     if (toggleToDate) {
         toggleToDate.addEventListener('change', function() {
             const isChecked = this.checked;
+            
+            // Toggle Visibility
+            if (isChecked) {
+                toDateEditControls.classList.remove('hidden');
+                toDateDisplayLabel.classList.add('hidden');
+            } else {
+                toDateEditControls.classList.add('hidden');
+                toDateDisplayLabel.classList.remove('hidden');
+                updateToDateDisplayLabel(); // Refresh label based on updated dropdowns
+            }
+
+            // Enable/Disable actual inputs
             toFields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -260,11 +330,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         const today = getTodayFasali();
                         if (id === 'toYear') el.value = today.year;
                         if (id === 'toMonth') el.value = today.month;
-                        if (id === 'toPaksha') el.value = today.phase;
                         if (id === 'toDay') el.value = today.day;
                     }
                 }
             });
+
+            // Handle Paksha Pill state for "To" date
+            if (toPakshaContainer) {
+                if (isChecked) {
+                    toPakshaContainer.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    toPakshaContainer.classList.add('opacity-50', 'pointer-events-none');
+                    const today = getTodayFasali();
+                    setPakshaValue('toPaksha', today.phase);
+                }
+            }
         });
     }
 
@@ -300,7 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tD = parseInt(document.getElementById('toDay').value);
 
         if (!fY || !fM || !fP || !fD || !tY || !tM || !tP || !tD) {
-            alert("उधार की पूरी तारीख चुनें / Select complete From and To dates.");
             return;
         }
 
