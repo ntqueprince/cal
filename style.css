@@ -31,7 +31,47 @@
     outline: none;
 }
 
-/* Updated Display Fields to prevent text clipping */
+/* Day select - Primary Control tuning */
+.day-select-secondary {
+    width: 95px !important;
+    height: 46px !important;
+    font-size: 14px !important;
+    flex: none !important;
+    padding: 0 10px !important;
+    border-color: #e5e7eb !important;
+}
+
+/* Paksha Pill Styling - Refined Secondary control */
+.paksha-pill-container-prominent {
+    background: #f3f4f6;
+    padding: 3px;
+    border-radius: 14px;
+    border: 1.5px solid #e5e7eb;
+    height: 46px; /* Aligning height with Day field */
+    display: flex;
+}
+
+.paksha-pill-prominent {
+    flex: 1;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 12px; /* Secondary font size */
+    font-weight: 700;
+    color: #6b7280;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    height: 100%;
+    white-space: nowrap;
+}
+
+.paksha-pill-prominent.active {
+    background: #7c3aed;
+    color: white;
+    box-shadow: 0 3px 8px rgba(124, 58, 237, 0.2);
+}
+
 .display-field {
     background: #ffffff !important;
     border: 1.5px solid #8b5cf6 !important;
@@ -40,11 +80,10 @@
     padding-bottom: 4px !important;
     color: #4c1d95 !important;
     font-size: 16px !important;
-    height: 54px !important; /* Fixed height for padding space */
+    height: 54px !important;
     line-height: 1 !important;
 }
 
-/* Disabled display style */
 .display-field:disabled {
     background: #f3f4f6 !important;
     border-color: #e5e7eb !important;
@@ -111,7 +150,6 @@
     margin-top: 24px;
 }
 
-/* Removed background: white to allow bg-utility classes from JS */
 .breakdown-item {
     border-radius: 10px;
     padding: 12px;
@@ -120,7 +158,6 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-/* Default fallback background if no utility class is provided */
 .breakdown-item:not([class*='bg-']) {
     background-color: white;
 }
@@ -136,4 +173,5 @@
 
 @media (max-width: 480px) {
     .card { border-radius: 20px; }
+    .paksha-pill-prominent { padding: 0 8px; font-size: 11px; }
 }
