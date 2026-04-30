@@ -36,7 +36,7 @@ function getTodayFasali() {
     const promptRefTotal = fasaliToTotalDays({year: 1433, month: 4, phase: 'sudi', day: 10});
     const realToday = new Date();
     realToday.setHours(0, 0, 0, 0);
-    const drift = Math.floor((realToday - promptDate) / (1000 * 60 * 60 * 24)) + 1;
+    const drift = Math.floor((realToday - promptDate) / (1000 * 60 * 60 * 24)) + 2;
     return totalDaysToFasali(promptRefTotal + drift);
 }
 
