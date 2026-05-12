@@ -1,16 +1,16 @@
 // --- Global state & Constants ---
 const MONTHS_FASALI = [
-    { value: 1, text: 'आश्विन / Ashvin' }, 
-    { value: 2, text: 'कार्तिक / Kartik' }, 
+    { value: 1, text: 'आश्विन / Ashvin' },
+    { value: 2, text: 'कार्तिक / Kartik' },
     { value: 3, text: 'मार्गशीर्ष / Agahan' },
-    { value: 4, text: 'पौष / Pausha' }, 
-    { value: 5, text: 'माघ / Magha' }, 
+    { value: 4, text: 'पौष / Pausha' },
+    { value: 5, text: 'माघ / Magha' },
     { value: 6, text: 'फाल्गुन / Phalguna' },
-    { value: 7, text: 'चैत / Chait' }, 
-    { value: 8, text: 'वैशाख / Vaishakh' }, 
+    { value: 7, text: 'चैत / Chait' },
+    { value: 8, text: 'वैशाख / Vaishakh' },
     { value: 9, text: 'ज्येष्ठ / Jyeshtha' },
-    { value: 10, text: 'आषाढ़ / Ashadha' }, 
-    { value: 11, text: 'श्रावण / Shravana' }, 
+    { value: 10, text: 'आषाढ़ / Ashadha' },
+    { value: 11, text: 'श्रावण / Shravana' },
     { value: 12, text: 'भाद्रपद / Bhadrapada' }
 ];
 
@@ -33,10 +33,10 @@ function totalDaysToFasali(total) {
 function getTodayFasali() {
     const promptDate = new Date(2025, 11, 29); // Dec 29, 2025
     promptDate.setHours(0, 0, 0, 0);
-    const promptRefTotal = fasaliToTotalDays({year: 1433, month: 4, phase: 'sudi', day: 10});
+    const promptRefTotal = fasaliToTotalDays({ year: 1433, month: 4, phase: 'sudi', day: 10 });
     const realToday = new Date();
     realToday.setHours(0, 0, 0, 0);
-    const drift = Math.floor((realToday - promptDate) / (1000 * 60 * 60 * 24)) + 2;
+    const drift = Math.floor((realToday - promptDate) / (1000 * 60 * 60 * 24)) + 1;
     return totalDaysToFasali(promptRefTotal + drift);
 }
 
@@ -44,9 +44,9 @@ function getTodayFasali() {
 function setPakshaValue(targetId, value) {
     const hiddenInput = document.getElementById(targetId);
     if (!hiddenInput) return;
-    
+
     hiddenInput.value = value;
-    
+
     // Update visual state of buttons in the same container
     const container = hiddenInput.parentElement;
     container.querySelectorAll('.paksha-pill-prominent').forEach(btn => {
@@ -99,7 +99,7 @@ function initializeDateRangeDropdowns() {
         if (fromYear) fromYear.add(new Option(i, i));
         if (toYear) toYear.add(new Option(i, i));
     }
-    
+
     // Populate "From" and "To" Months
     MONTHS_FASALI.forEach(m => {
         if (fromMonth) fromMonth.add(new Option(m.text, m.value));
@@ -116,7 +116,7 @@ function initializeDateRangeDropdowns() {
     if (toYear) toYear.value = today.year;
     if (toMonth) toMonth.value = today.month;
     if (toDay) toDay.value = today.day;
-    
+
     // Set initial Paksha states
     setPakshaValue('fromPaksha', 'sudi');
     setPakshaValue('toPaksha', today.phase);
@@ -135,8 +135,8 @@ function selectMode(modeValue) {
 
 // --- CALCULATIONS ---
 function calculateTimeDifference(fY, fM, fD, fP, tY, tM, tD, tP) {
-    const startTotal = fasaliToTotalDays({year: fY, month: fM, phase: fP, day: fD});
-    const endTotal = fasaliToTotalDays({year: tY, month: tM, phase: tP, day: tD});
+    const startTotal = fasaliToTotalDays({ year: fY, month: fM, phase: fP, day: fD });
+    const endTotal = fasaliToTotalDays({ year: tY, month: tM, phase: tP, day: tD });
     let totalDays = endTotal - startTotal;
     if (totalDays < 0) totalDays = 0;
     const years = Math.floor(totalDays / 360);
@@ -176,7 +176,7 @@ function calculateCustomInterest(principal, rate, years, months, days) {
 }
 
 // Result Details Toggle
-window.toggleDetails = function() {
+window.toggleDetails = function () {
     const wrapper = document.getElementById('detailsWrapper');
     const icon = document.querySelector('#detailsToggleBtn i');
     if (!wrapper) return;
@@ -192,7 +192,7 @@ window.toggleDetails = function() {
 // --- FORM HANDLING ---
 const calcForm = document.getElementById('calculatorForm');
 if (calcForm) {
-    calcForm.addEventListener('submit', function(e) {
+    calcForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const principal = parseFloat(document.getElementById('principal').value);
         const rate = parseFloat(document.getElementById('interestRate').value);
@@ -202,10 +202,10 @@ if (calcForm) {
         const modeInput = document.querySelector('input[name="calculationMode"]:checked');
         const mode = modeInput ? modeInput.value : 'custom';
 
-        let result = (mode === 'simple') 
+        let result = (mode === 'simple')
             ? calculateSimpleInterest(principal, rate, years, months, days)
             : calculateCustomInterest(principal, rate, years, months, days);
-        
+
         displayResults(result, principal, rate, years, months, days, mode);
     });
 }
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Paksha Pill Click Handling
     document.querySelectorAll('.paksha-pill-prominent').forEach(pill => {
-        pill.addEventListener('click', function() {
+        pill.addEventListener('click', function () {
             setPakshaValue(this.dataset.target, this.dataset.value);
             // If toggling 'toPaksha', ensure display label updates if visible
             if (this.dataset.target === 'toPaksha') {
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         daysInput.disabled = true;
         if (dateRangeText) dateRangeText.classList.add('text-lite');
     });
-    
+
     daysInput.addEventListener('input', () => {
         if (dateRangeText) dateRangeText.classList.add('text-lite');
     });
@@ -304,11 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const toPakshaContainer = document.getElementById('toPakshaContainer');
     const toDateEditControls = document.getElementById('toDateEditControls');
     const toDateDisplayLabel = document.getElementById('toDateDisplayLabel');
-    
+
     if (toggleToDate) {
-        toggleToDate.addEventListener('change', function() {
+        toggleToDate.addEventListener('change', function () {
             const isChecked = this.checked;
-            
+
             // Toggle Visibility
             if (isChecked) {
                 toDateEditControls.classList.remove('hidden');
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fM = parseInt(document.getElementById('fromMonth').value);
         const fP = document.getElementById('fromPaksha').value;
         const fD = parseInt(document.getElementById('fromDay').value);
-        
+
         const tY = parseInt(document.getElementById('toYear').value);
         const tM = parseInt(document.getElementById('toMonth').value);
         const tP = document.getElementById('toPaksha').value;
@@ -391,11 +391,11 @@ document.addEventListener('DOMContentLoaded', () => {
         yearsInput.disabled = false;
         monthsInput.disabled = false;
         daysInput.disabled = false;
-        
+
         yearsInput.value = diff.years;
         monthsInput.value = diff.months;
         daysInput.value = diff.days;
-        
+
         dateRangeText.textContent = `${diff.years}Y ${diff.months}M ${diff.days}D`;
         dateRangeText.classList.remove('text-lite');
         modal.classList.add('hidden');
