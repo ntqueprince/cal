@@ -14,15 +14,55 @@ const MONTHS_FASALI = [
     { value: 12, text: 'भाद्रपद / Bhadrapada' }
 ];
 
-// --- FASALI CORE LOGIC (DO NOT CHANGE) ---
+const ADHIK_MONTHS_BY_YEAR = {
+    1433: [
+        { value: 1, text: '\u0906\u0936\u094d\u0935\u093f\u0928 / Ashvin' },
+        { value: 2, text: '\u0915\u093e\u0930\u094d\u0924\u093f\u0915 / Kartik' },
+        { value: 3, text: '\u0905\u0917\u0939\u0928 / Agahan' },
+        { value: 4, text: '\u092a\u094c\u0937 / Pausha' },
+        { value: 5, text: '\u092e\u093e\u0918 / Magha' },
+        { value: 6, text: '\u092b\u093e\u0932\u094d\u0917\u0941\u0928 / Phalguna' },
+        { value: 7, text: '\u091a\u0948\u0924 / Chait' },
+        { value: 8, text: '\u0935\u0948\u0936\u093e\u0916 / Vaishakh' },
+        { value: 9, text: '\u091c\u0947\u0920 / Jyeshtha' },
+        { value: 10, text: '\u091c\u0947\u0920-2 / Jyeshtha-2' },
+        { value: 11, text: '\u0906\u0937\u093e\u0922 / Ashadha' },
+        { value: 12, text: '\u0936\u094d\u0930\u093e\u0935\u0923 / Shravana' },
+        { value: 13, text: '\u092d\u093e\u0926\u094d\u0930\u092a\u0926 / Bhadrapada' }
+    ]
+};
+
+// --- FASALI CORE LOGIC ---
+function getMonthsForYear(year) {
+    return ADHIK_MONTHS_BY_YEAR[year] || MONTHS_FASALI;
+}
+
+function getExtraDaysBeforeYear(year) {
+    return Object.keys(ADHIK_MONTHS_BY_YEAR)
+        .map(Number)
+        .filter(adhikYear => adhikYear < year)
+        .length * 30;
+}
+
+function getYearLength(year) {
+    return 360 + (ADHIK_MONTHS_BY_YEAR[year] ? 30 : 0);
+}
+
 function fasaliToTotalDays(f) {
     const phaseOffset = f.phase.toLowerCase() === 'sudi' ? 15 : 0;
-    return (f.year * 360) + ((f.month - 1) * 30) + phaseOffset + (f.day - 1);
+    return (f.year * 360) + getExtraDaysBeforeYear(f.year) + ((f.month - 1) * 30) + phaseOffset + (f.day - 1);
 }
 
 function totalDaysToFasali(total) {
-    const year = Math.floor(total / 360);
-    let rem = total % 360;
+    let year = Math.floor(total / 360);
+    while (total < (year * 360) + getExtraDaysBeforeYear(year)) {
+        year--;
+    }
+    while (total >= (year * 360) + getExtraDaysBeforeYear(year) + getYearLength(year)) {
+        year++;
+    }
+
+    let rem = total - ((year * 360) + getExtraDaysBeforeYear(year));
     const month = Math.floor(rem / 30) + 1;
     rem = rem % 30;
     const phase = rem < 15 ? 'badi' : 'sudi';
@@ -66,11 +106,25 @@ function updateToDateDisplayLabel() {
     const mSelect = document.getElementById('toMonth');
     const mText = mSelect.options[mSelect.selectedIndex]?.text.split(' / ')[0] || '';
     const pValue = document.getElementById('toPaksha').value;
+    const pTextClean = pValue === 'sudi' ? '\u0938\u0941\u0926\u0940' : '\u092c\u0926\u0940';
     const pText = pValue === 'sudi' ? 'सुदी' : 'बदी';
     const d = document.getElementById('toDay').value;
     const label = document.getElementById('toDateDisplayLabel');
     if (label) {
-        label.textContent = `${mText}-${pText}-${d}-${y}`;
+        label.textContent = `${mText}-${pTextClean}-${d}-${y}`;
+    }
+}
+
+function populateMonthSelect(select, year, preferredValue) {
+    if (!select) return;
+    const months = getMonthsForYear(year);
+    const nextValue = String(preferredValue || select.value || '');
+
+    select.innerHTML = '';
+    months.forEach(m => select.add(new Option(m.text, m.value)));
+
+    if (months.some(m => String(m.value) === nextValue)) {
+        select.value = nextValue;
     }
 }
 
@@ -101,10 +155,8 @@ function initializeDateRangeDropdowns() {
     }
 
     // Populate "From" and "To" Months
-    MONTHS_FASALI.forEach(m => {
-        if (fromMonth) fromMonth.add(new Option(m.text, m.value));
-        if (toMonth) toMonth.add(new Option(m.text, m.value));
-    });
+    populateMonthSelect(fromMonth, parseInt(fromYear?.value));
+    populateMonthSelect(toMonth, parseInt(toYear?.value));
 
     // Populate "From" and "To" Days
     for (let i = 1; i <= 15; i++) {
@@ -114,8 +166,21 @@ function initializeDateRangeDropdowns() {
 
     const today = getTodayFasali();
     if (toYear) toYear.value = today.year;
+    populateMonthSelect(toMonth, today.year, today.month);
     if (toMonth) toMonth.value = today.month;
     if (toDay) toDay.value = today.day;
+
+    if (fromYear) {
+        fromYear.addEventListener('change', () => {
+            populateMonthSelect(fromMonth, parseInt(fromYear.value));
+        });
+    }
+    if (toYear) {
+        toYear.addEventListener('change', () => {
+            populateMonthSelect(toMonth, parseInt(toYear.value));
+            updateToDateDisplayLabel();
+        });
+    }
 
     // Set initial Paksha states
     setPakshaValue('fromPaksha', 'sudi');
@@ -330,7 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         el.classList.add('bg-gray-100', 'cursor-not-allowed');
                         // Reset to today when disabling
                         const today = getTodayFasali();
-                        if (id === 'toYear') el.value = today.year;
+                        if (id === 'toYear') {
+                            el.value = today.year;
+                            populateMonthSelect(document.getElementById('toMonth'), today.year, today.month);
+                        }
                         if (id === 'toMonth') el.value = today.month;
                         if (id === 'toDay') el.value = today.day;
                     }
