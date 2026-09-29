@@ -132,12 +132,19 @@ function populateMonthSelect(select, year, preferredValue) {
 function initializeRateDropdown() {
     const rateSelect = document.getElementById('interestRate');
     if (!rateSelect) return;
+    const rates = [];
     for (let i = 0.5; i <= 10; i += 0.5) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = `${i}% monthly`;
-        rateSelect.appendChild(option);
+        rates.push(i);
+        if (i === 1.5) {
+            rates.push(1.75);
+        }
     }
+    rates.forEach(rate => {
+        const option = document.createElement('option');
+        option.value = rate;
+        option.textContent = `${rate}% monthly`;
+        rateSelect.appendChild(option);
+    });
 }
 
 function initializeDateRangeDropdowns() {
@@ -428,6 +435,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    if (rateSelect) {
+        rateSelect.addEventListener('change', () => {
+            document.querySelectorAll('#rateShortcuts .ui-shortcut').forEach(b => {
+                b.classList.toggle('active', b.dataset.value === rateSelect.value);
+            });
+        });
+    }
 
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => selectMode(btn.dataset.mode));
