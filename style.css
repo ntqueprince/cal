@@ -47,7 +47,8 @@
     padding: 3px;
     border-radius: 14px;
     border: 1.5px solid #e5e7eb;
-    height: 46px; /* Aligning height with Day field */
+    height: 46px;
+    /* Aligning height with Day field */
     display: flex;
 }
 
@@ -55,7 +56,8 @@
     flex: 1;
     padding: 0 12px;
     border-radius: 10px;
-    font-size: 12px; /* Secondary font size */
+    font-size: 12px;
+    /* Secondary font size */
     font-weight: 700;
     color: #6b7280;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -155,7 +157,7 @@
     padding: 12px;
     margin-bottom: 8px;
     border-left: 4px solid #8b5cf6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .breakdown-item:not([class*='bg-']) {
@@ -167,11 +169,24 @@
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 480px) {
-    .card { border-radius: 20px; }
-    .paksha-pill-prominent { padding: 0 8px; font-size: 11px; }
+    .card {
+        border-radius: 20px;
+    }
+
+    .paksha-pill-prominent {
+        padding: 0 8px;
+        font-size: 11px;
+    }
 }
